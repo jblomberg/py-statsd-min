@@ -1,0 +1,9 @@
+* Docstrings
+* Logging
+* Self-reported stats
+* Command line / property file configuration
+* Exception handling for bad input
+* Testcases
+* Implement clean_key()
+* Cleanup calculate_interval_metrics()
+* Profiling
