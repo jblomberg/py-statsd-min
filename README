@@ -11,6 +11,10 @@ A minimal Python implementation of Etsy's [statsD].
 * Wanted support for 'gauges', as recently added to statsD in this
   [pull request][gauges-pull]
 
+## Items of Note
+* No imposition of key prefixes. Clients choose their own namespace.
+* Imposes key suffixes for all types in order to simplify management of
+  Carbon's storage-aggregation.conf and aggregation-rules.conf
 
 ## Inspirations
 * [statsD]
