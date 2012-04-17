@@ -2,9 +2,11 @@
 
 import calendar
 from contextlib import closing
+import logging
 import signal
 import socket
 import SocketServer
+import sys
 import threading
 import time
 
@@ -48,12 +50,11 @@ server = None
 
 def process_lines(metric_lines):
     for line in metric_lines:
-        # FIXME Need to catch exceptions thrown from parse_line so we don't
-        # throw away other good metrics due to a single bad input line
-        parsed_line = parse_line(line)
-        # FIXME same here, don't want to break out of this loop due to a
-        # single bad metric
-        add_metric(*parsed_line)
+        try:
+            parsed_line = parse_line(line)
+            add_metric(*parsed_line)
+        except (IndexError, KeyError) as e:
+            logging.exception(e)
 
 
 def parse_line(metric_line):
