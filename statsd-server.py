@@ -3,6 +3,7 @@
 import calendar
 from contextlib import closing
 import logging
+import re
 import signal
 import socket
 import SocketServer
@@ -85,9 +86,13 @@ def add_metric(key, data, metric_type, sample_rate):
 def clean_key(key):
     '''
     Replace whitespace with '_', '/' with '-', and remove all
-    non-alphanumerics remaining (except '.').
+    non-alphanumerics remaining (except '.', '_', and '-').
+
     '''
-    return key
+    new_key = re.sub('''\s+''', '_', key)
+    new_key = new_key.replace('/', '-')
+    new_key = re.sub(r'[^a-zA-Z_\-0-9\.]', '', new_key)
+    return new_key.lower()
 
 
 def calculate_interval_metrics():
