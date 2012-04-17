@@ -172,13 +172,15 @@ def send_metrics(formatted_metrics):
 
 
 def flush_metrics():
-    interval_metrics = calculate_interval_metrics()
-    # add internal metrics
-    if len(interval_metrics) > 0:
-        formatted_metrics = format_metrics(interval_metrics)
-        send_metrics(formatted_metrics)
-    clear_metrics()
-    schedule_flush()
+    try:
+        interval_metrics = calculate_interval_metrics()
+        # add internal metrics
+        if len(interval_metrics) > 0:
+            formatted_metrics = format_metrics(interval_metrics)
+            send_metrics(formatted_metrics)
+        clear_metrics()
+    finally:
+        schedule_flush()
 
 
 def clear_metrics():
