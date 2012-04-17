@@ -140,7 +140,7 @@ def calculate_interval_metrics():
             'mean': mean,
             'count': count,
             'max_threshold': max_threshold,
-            'pct_threshold': threshold,
+            'pct_threshold': int(threshold),
             'type': METRIC_TYPE_TIMER_SYMBOL
         }
         interval_metrics.append(metric)
