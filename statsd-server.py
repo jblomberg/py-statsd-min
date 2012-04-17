@@ -11,10 +11,10 @@ import sys
 import threading
 import time
 
-HOST, PORT = 'localhost', 9999
+HOST, PORT = '0.0.0.0', 8125
 
 CARBON_IP = '127.0.0.1'
-CARBON_PORT = 9998
+CARBON_PORT = 2003
 
 METRIC_TYPE_COUNTER_SYMBOL = 'c'
 METRIC_TYPE_TIMER_SYMBOL = 'ms'
