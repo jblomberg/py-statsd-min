@@ -8,3 +8,4 @@
 * Don't open connection every second
 * Add timeout/reconnect to socket
 * Allow multiple destination servers
+* Figure out the best way to handle a line containing only a NUL (last line sent in UDP packet)
