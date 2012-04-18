@@ -35,21 +35,31 @@ class ServerTestSuite(unittest.TestCase):
         self.assertRaises(ValueError, server.parse_line, 'nocolon 1|c')
         self.assertRaises(ValueError, server.parse_line, 'notype:1')
         self.assertRaises(ValueError, server.parse_line, 'notype:1|')
+        self.assertRaises(ValueError, server.parse_line, 'nosep:1 c')
         self.assertRaises(ValueError, server.parse_line, 'badtype:1|a')
         self.assertRaises(ValueError, server.parse_line, 'badval:help|c')
 
     def test_parse_line_counter(self):
-        line = 'test.key: 1|c'
-        metric = server.parse_line(line)
+        metric = server.parse_line('test.key: 1|c')
         self.assertEqual(metric, ('test.key', 1.0, 'c', 1.0))
 
-        line = 'test.key: 1|c|@0.1'
-        metric = server.parse_line(line)
+        metric = server.parse_line('test.key: 1|c|@0.1')
         self.assertEqual(metric, (('test.key', 1.0, 'c', 0.1)))
 
         line = 'test.key: 1|c|2'
         self.assertRaises(ValueError, server.parse_line, line)
 
+    def test_parse_line_gauge(self):
+        metric = server.parse_line('test.key: 5|g')
+        self.assertEqual(metric, ('test.key', 5.0, 'g', 1.0))
+
+        self.assertRaises(ValueError, server.parse_line, 'test:5|g|@0.1')
+
+    def test_parse_line_duration(self):
+        metric = server.parse_line('test.key: 34.5|ms')
+        self.assertEqual(metric, ('test.key', 34.5, 'ms', 1.0))
+
+        self.assertRaises(ValueError, server.parse_line, 'test:5|ms|@0.1')
 
 
 if __name__ == '__main__':
