@@ -19,7 +19,7 @@ CARBON_PORT = 2003
 METRIC_TYPE_COUNTER_SYMBOL = 'c'
 METRIC_TYPE_TIMER_SYMBOL = 'ms'
 METRIC_TYPE_GAUGE_SYMBOL = 'g'
-DEFAULT_SAMPLE_RATE = 1
+DEFAULT_SAMPLE_RATE = 1.0
 
 TIMER_MSG_FORMAT = '''%(key)s.lower %(min)s %(ts)s
 %(key)s.count %(count)s %(ts)s
@@ -54,7 +54,7 @@ def process_lines(metric_lines):
         try:
             parsed_line = parse_line(line)
             add_metric(*parsed_line)
-        except (IndexError, KeyError) as e:
+        except ValueError as e:
             logging.exception(e)
 
 
@@ -62,19 +62,25 @@ def parse_line(metric_line):
     '''
     Parse a line, extracting the key, data, metric type and sample rate.
     '''
-    metric_line = metric_line.strip()
-    components = metric_line.split(':')
-    key = components[0]
-    key = clean_key(key)
-    components = components[1].split('|')
-    data = float(components[0])
-    metric_type = components[1]
-    sample_rate = DEFAULT_SAMPLE_RATE
-    if len(components) > 2:
-        if metric_type != METRIC_TYPE_COUNTER_SYMBOL:
-            raise RuntimeError
-        sample_rate = float(components[2].split('@')[1])
-    return key, data, metric_type, sample_rate
+    try:
+        metric_line = metric_line.strip()
+        components = metric_line.split(':')
+        key = components[0]
+        key = clean_key(key)
+        components = components[1].split('|')
+        data = float(components[0])
+        metric_type = components[1]
+        if metric_type not in metrics.keys():
+            raise LookupError("Invalid metric type '%s'" % metric_type)
+        sample_rate = DEFAULT_SAMPLE_RATE
+        if len(components) > 2:
+            if metric_type != METRIC_TYPE_COUNTER_SYMBOL:
+                raise ValueError(
+                    "Sample rate illegal for non-counter type '%s'" % metric_type)
+            sample_rate = float(components[2].split('@')[1])
+        return key, data, metric_type, sample_rate
+    except Exception as e:
+        raise ValueError(e.message), None, sys.exc_info()[2]
 
 
 def add_metric(key, data, metric_type, sample_rate):
