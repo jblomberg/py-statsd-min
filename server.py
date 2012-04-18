@@ -199,8 +199,16 @@ def schedule_flush():
     timer.start()
 
 
+class StatsDHandler(SocketServer.DatagramRequestHandler):
+    '''
+    Request handler for the StatsD 'protocol'
+    '''
+    def handle(self):
+        metric_lines = self.rfile.readlines()
+        process_lines(metric_lines)
+
+
 def serve():
-    print 'Listening on %s:%d' % (HOST, PORT)
     global server
     server = SocketServer.UDPServer((HOST, PORT), StatsDHandler)
     server.serve_forever()
@@ -213,33 +221,20 @@ def signal_handler(signal, frame):
     server.shutdown()
 
 
-class StatsDHandler(SocketServer.DatagramRequestHandler):
-    '''
-    Request handler for the StatsD 'protocol'
-    '''
-    def handle(self):
-        metric_lines = self.rfile.readlines()
-        process_lines(metric_lines)
+def serve_forever():
+    thread = threading.Thread(target=serve)
+    thread.daemon = True
+    thread.start()
+
+    while thread.isAlive():
+        thread.join(0.2)
 
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
     schedule_flush()
-
-    thread = threading.Thread(target=serve)
-    thread.daemon = True
-    thread.start()
-
-    # Apparently `thread.join` blocks the main thread and makes it
-    # _uninterruptable_, so we need to do this loop so that the main
-    # thread can respond to signal handlers.
-    while thread.isAlive():
-        thread.join(0.2)
+    serve_forever()
 
 
 if __name__ == '__main__':
     main()
-
-
-
-# a thread needs to be running that will wake up on a timer and send the collected data somewhere else
