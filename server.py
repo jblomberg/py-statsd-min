@@ -223,8 +223,10 @@ def serve():
 def signal_handler(signal, frame):
     global timer
     global server
-    timer.cancel()
-    server.shutdown()
+    if timer:
+        timer.cancel()
+    if server:
+        server.shutdown()
 
 
 def serve_forever():
