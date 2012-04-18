@@ -7,4 +7,4 @@
 * Command line / property file configuration
 * Cleanup calculate_interval_metrics()
 * Profiling
-* Investigate adding support for the carbon pickle protocol (faster)
+* Don't open connection every second
