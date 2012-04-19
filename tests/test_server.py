@@ -75,6 +75,17 @@ class ServerTestSuite(unittest.TestCase):
         server.add_metric('test.key', 1.0, 'ms', 1.0)
         self.assertEqual(server.metrics['ms']['test.key'], [1.0, 1.0])
 
+    def test_process_lines(self):
+        lines = [
+            'test.key: 1|c\n',
+            'badline',
+            'test.key: 2|c\n',
+            'test.key2: 20|ms\n',
+            ]
+        server.process_lines(lines)
+        self.assertEqual(server.metrics['c']['test.key'], [1.0, 2.0])
+        self.assertEqual(server.metrics['ms']['test.key2'], [20.0])
+
 
 if __name__ == '__main__':
     unittest.main()
