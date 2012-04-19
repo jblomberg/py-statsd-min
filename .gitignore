@@ -1,2 +1,7 @@
-
+.coverage
+.Python
 *.pyc
+lib/*
+bin/*
+man/*
+include/*
