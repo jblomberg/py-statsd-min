@@ -13,6 +13,8 @@ import unittest
 
 class ServerTestSuite(unittest.TestCase):
     '''StatsD server test cases'''
+    def setUp(self):
+        server.clear_metrics()
     def test_clean_key(self):
         key = server.clean_key('test key')
         self.assertEqual(key, 'test_key')
