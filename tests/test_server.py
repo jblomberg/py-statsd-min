@@ -61,6 +61,18 @@ class ServerTestSuite(unittest.TestCase):
 
         self.assertRaises(ValueError, server.parse_line, 'test:5|ms|@0.1')
 
+    def test_add_metric(self):
+        server.add_metric('test.key', 1.0, 'c', 1.0)
+        self.assertEqual(server.metrics['c']['test.key'], [1.0])
+
+        server.add_metric('test.key', 1.0, 'c', 0.1)
+        self.assertEqual(server.metrics['c']['test.key'], [1.0, 10.0])
+
+        server.add_metric('test.key', 1.0, 'ms', 1.0)
+        self.assertEqual(server.metrics['ms']['test.key'], [1.0])
+        server.add_metric('test.key', 1.0, 'ms', 1.0)
+        self.assertEqual(server.metrics['ms']['test.key'], [1.0, 1.0])
+
 
 if __name__ == '__main__':
     unittest.main()
