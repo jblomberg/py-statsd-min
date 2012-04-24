@@ -51,6 +51,9 @@ server = None
 
 def process_lines(metric_lines):
     for line in metric_lines:
+        line = line.strip('\0')
+        if len(line) == 0:
+            continue
         try:
             parsed_line = parse_line(line)
             add_metric(*parsed_line)
