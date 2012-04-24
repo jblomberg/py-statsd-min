@@ -73,7 +73,7 @@ def parse_line(metric_line):
         components = components[1].split('|')
         data = float(components[0])
         metric_type = components[1]
-        if metric_type not in metrics.keys():
+        if metric_type not in metrics:
             raise LookupError("Invalid metric type '%s'" % metric_type)
         sample_rate = DEFAULT_SAMPLE_RATE
         if len(components) > 2:
