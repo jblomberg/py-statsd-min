@@ -83,7 +83,7 @@ def parse_line(metric_line):
             sample_rate = float(components[2].split('@')[1])
         return key, data, metric_type, sample_rate
     except Exception as e:
-        raise ValueError(e.message), None, sys.exc_info()[2]
+        raise ValueError(e.message + ' line: [%s]' % metric_line), None, sys.exc_info()[2]
 
 
 def add_metric(key, data, metric_type, sample_rate):
