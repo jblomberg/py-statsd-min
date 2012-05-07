@@ -221,9 +221,11 @@ def flush_metrics():
         if len(interval_metrics) > 0:
             formatted_metrics = format_metrics(interval_metrics)
             send_metrics(formatted_metrics)
-        clear_metrics()
     finally:
-        schedule_flush()
+        try:
+            clear_metrics()
+        finally:
+            schedule_flush()
 
 
 def clear_metrics():
