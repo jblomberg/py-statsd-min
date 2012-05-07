@@ -48,6 +48,7 @@ metrics = {
 
 timer = None
 server = None
+lock = threading.Lock()
 
 def process_lines(metric_lines):
     for line in metric_lines:
@@ -87,9 +88,10 @@ def parse_line(metric_line):
 
 
 def add_metric(key, data, metric_type, sample_rate):
-    metric_keys = metrics[metric_type]
-    interval_data = metric_keys.setdefault(key, [])
-    interval_data.append(data * (1 / sample_rate))
+    with lock:
+        metric_keys = metrics[metric_type]
+        interval_data = metric_keys.setdefault(key, [])
+        interval_data.append(data * (1 / sample_rate))
 
 
 def clean_key(key):
@@ -105,61 +107,62 @@ def clean_key(key):
 
 
 def calculate_interval_metrics():
-    interval_metrics = []
-    timestamp = calendar.timegm(time.gmtime())
-    threshold = 90.0
+    with lock:
+        interval_metrics = []
+        timestamp = calendar.timegm(time.gmtime())
+        threshold = 90.0
 
-    counters = metrics[METRIC_TYPE_COUNTER_SYMBOL]
-    for key, values in counters.iteritems():
-        count = sum(values)
-        metric = {
-            'key' : key,
-            'ts': timestamp,
-            'count': count,
-            'type': METRIC_TYPE_COUNTER_SYMBOL
-        }
-        interval_metrics.append(metric)
+        counters = metrics[METRIC_TYPE_COUNTER_SYMBOL]
+        for key, values in counters.iteritems():
+            count = sum(values)
+            metric = {
+                'key' : key,
+                'ts': timestamp,
+                'count': count,
+                'type': METRIC_TYPE_COUNTER_SYMBOL
+            }
+            interval_metrics.append(metric)
 
-    timers = metrics[METRIC_TYPE_TIMER_SYMBOL]
-    for key, values in timers.iteritems():
-        count = len(values)
-        values.sort()
-        min_val = values[0]
-        max_val = values[-1]
+        timers = metrics[METRIC_TYPE_TIMER_SYMBOL]
+        for key, values in timers.iteritems():
+            count = len(values)
+            values.sort()
+            min_val = values[0]
+            max_val = values[-1]
 
-        mean = min_val
-        max_threshold = max_val
-        if count > 1:
-            thresh_index = int((threshold / 100.0) * count)
-            max_threshold = values[thresh_index - 1]
-            total = sum(values)
-            mean = total / count
+            mean = min_val
+            max_threshold = max_val
+            if count > 1:
+                thresh_index = int((threshold / 100.0) * count)
+                max_threshold = values[thresh_index - 1]
+                total = sum(values)
+                mean = total / count
 
-        metric = {
-            'key': key,
-            'ts': timestamp,
-            'min': min_val,
-            'max': max_val,
-            'mean': mean,
-            'count': count,
-            'max_threshold': max_threshold,
-            'pct_threshold': int(threshold),
-            'type': METRIC_TYPE_TIMER_SYMBOL
-        }
-        interval_metrics.append(metric)
+            metric = {
+                'key': key,
+                'ts': timestamp,
+                'min': min_val,
+                'max': max_val,
+                'mean': mean,
+                'count': count,
+                'max_threshold': max_threshold,
+                'pct_threshold': int(threshold),
+                'type': METRIC_TYPE_TIMER_SYMBOL
+            }
+            interval_metrics.append(metric)
 
-    gauges = metrics[METRIC_TYPE_GAUGE_SYMBOL]
-    for key, values in gauges.iteritems():
-        last = values[-1]
-        metric = {
-            'key' : key,
-            'ts': timestamp,
-            'value': last,
-            'type': METRIC_TYPE_GAUGE_SYMBOL
-        }
-        interval_metrics.append(metric)
+        gauges = metrics[METRIC_TYPE_GAUGE_SYMBOL]
+        for key, values in gauges.iteritems():
+            last = values[-1]
+            metric = {
+                'key' : key,
+                'ts': timestamp,
+                'value': last,
+                'type': METRIC_TYPE_GAUGE_SYMBOL
+            }
+            interval_metrics.append(metric)
 
-    return interval_metrics
+        return interval_metrics
 
 
 def format_metrics(interval_metrics):
@@ -198,8 +201,9 @@ def flush_metrics():
 
 
 def clear_metrics():
-    for metric_type, metric_keys in metrics.iteritems():
-        metric_keys.clear()
+    with lock:
+        for metric_type, metric_keys in metrics.iteritems():
+            metric_keys.clear()
 
 
 def schedule_flush():
