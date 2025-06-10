@@ -2,6 +2,7 @@
 
 import calendar
 from contextlib import closing
+import functools
 import logging
 import re
 import signal
@@ -109,7 +110,7 @@ class memoized(object):
          self.cache[args] = value
          return value
       except TypeError:
-         # uncachable -- for instance, passing a list as an argument.
+         # uncacheable -- for instance, passing a list as an argument.
          # Better to not cache than to blow up entirely.
          return self.func(*args)
    def __repr__(self):
@@ -124,6 +125,7 @@ def clean_key(key):
     '''
     Replace whitespace with '_', '/' with '-', and remove all
     non-alphanumerics remaining (except '.', '_', and '-').
+    The cleaned key is returned in lowercase.
 
     '''
     new_key = re.sub('''\s+''', '_', key)
