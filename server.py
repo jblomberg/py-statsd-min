@@ -127,7 +127,7 @@ def clean_key(key):
     non-alphanumerics remaining (except '.', '_', and '-').
 
     '''
-    new_key = re.sub('''\s+''', '_', key)
+    new_key = re.sub(r'\s+', '_', key)
     new_key = new_key.replace('/', '-')
     new_key = re.sub(r'[^a-zA-Z_\-0-9\.]', '', new_key)
     return new_key.lower()
