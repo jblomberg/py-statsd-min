@@ -2,12 +2,12 @@
 
 import calendar
 from contextlib import closing
-import functools
 import logging
 import re
 import signal
 import socket
-import SocketServer
+import socketserver
+import functools
 import sys
 import threading
 import time
@@ -85,7 +85,7 @@ def parse_line(metric_line):
             sample_rate = float(components[2].split('@')[1])
         return key, data, metric_type, sample_rate
     except Exception as e:
-        raise ValueError(e.message + ' line: [%s]' % metric_line), None, sys.exc_info()[2]
+        raise ValueError(f"{e} line: [{metric_line}]")
 
 
 def add_metric(key, data, metric_type, sample_rate):
@@ -110,7 +110,7 @@ class memoized(object):
          self.cache[args] = value
          return value
       except TypeError:
-         # uncacheable -- for instance, passing a list as an argument.
+        # uncacheable -- for instance, passing a list as an argument.
          # Better to not cache than to blow up entirely.
          return self.func(*args)
    def __repr__(self):
@@ -126,9 +126,8 @@ def clean_key(key):
     Replace whitespace with '_', '/' with '-', and remove all
     non-alphanumerics remaining (except '.', '_', and '-').
     The cleaned key is returned in lowercase.
-
     '''
-    new_key = re.sub('''\s+''', '_', key)
+    new_key = re.sub(r'\s+', '_', key)
     new_key = new_key.replace('/', '-')
     new_key = re.sub(r'[^a-zA-Z_\-0-9\.]', '', new_key)
     return new_key.lower()
@@ -141,7 +140,7 @@ def calculate_interval_metrics():
         threshold = 90.0
 
         counters = metrics[METRIC_TYPE_COUNTER_SYMBOL]
-        for key, values in counters.iteritems():
+        for key, values in counters.items():
             count = sum(values)
             metric = {
                 'key' : key,
@@ -152,7 +151,7 @@ def calculate_interval_metrics():
             interval_metrics.append(metric)
 
         timers = metrics[METRIC_TYPE_TIMER_SYMBOL]
-        for key, values in timers.iteritems():
+        for key, values in timers.items():
             count = len(values)
             values.sort()
             min_val = values[0]
@@ -180,7 +179,7 @@ def calculate_interval_metrics():
             interval_metrics.append(metric)
 
         gauges = metrics[METRIC_TYPE_GAUGE_SYMBOL]
-        for key, values in gauges.iteritems():
+        for key, values in gauges.items():
             last = values[-1]
             metric = {
                 'key' : key,
@@ -232,7 +231,7 @@ def flush_metrics():
 
 def clear_metrics():
     with lock:
-        for metric_type, metric_keys in metrics.iteritems():
+        for metric_type, metric_keys in metrics.items():
             metric_keys.clear()
 
 
@@ -242,7 +241,7 @@ def schedule_flush():
     timer.start()
 
 
-class StatsDHandler(SocketServer.DatagramRequestHandler):
+class StatsDHandler(socketserver.DatagramRequestHandler):
     '''
     Request handler for the StatsD 'protocol'
     '''
@@ -253,7 +252,7 @@ class StatsDHandler(SocketServer.DatagramRequestHandler):
 
 def serve():
     global server
-    server = SocketServer.UDPServer((HOST, PORT), StatsDHandler)
+    server = socketserver.UDPServer((HOST, PORT), StatsDHandler)
     server.serve_forever()
 
 
@@ -271,7 +270,7 @@ def serve_forever():
     thread.daemon = True
     thread.start()
 
-    while thread.isAlive():
+    while thread.is_alive():
         thread.join(0.2)
 
 
