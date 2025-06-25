@@ -46,7 +46,7 @@ class ServerTestSuite(unittest.TestCase):
         self.assertEqual(metric, ('test.key', 1.0, 'c', 1.0))
 
         metric = server.parse_line('test.key: 1|c|@0.1')
-        self.assertEqual(metric, (('test.key', 1.0, 'c', 0.1)))
+        self.assertEqual(metric, ('test.key', 1.0, 'c', 0.1))
 
         line = 'test.key: 1|c|2'
         self.assertRaises(ValueError, server.parse_line, line)
