@@ -93,6 +93,49 @@ class ServerTestSuite(unittest.TestCase):
         self.assertEqual(server.metrics['ms']['test.key2'], [20.0])
         self.assertEqual(server.metrics['g']['test.gauge'], [10.0])
 
+    def test_clear_metrics(self):
+        server.add_metric('foo', 1, 'c', 1.0)
+        server.add_metric('bar', 2, 'ms', 1.0)
+        server.add_metric('baz', 3, 'g', 1.0)
+        server.clear_metrics()
+        self.assertEqual(server.metrics['c'], {})
+        self.assertEqual(server.metrics['ms'], {})
+        self.assertEqual(server.metrics['g'], {})
+
+    def test_calculate_and_format_metrics(self):
+        server.add_metric('counter.key', 5, 'c', 1.0)
+        server.add_metric('counter.key', 3, 'c', 1.0)
+        server.add_metric('timer.key', 10, 'ms', 1.0)
+        server.add_metric('timer.key', 30, 'ms', 1.0)
+        server.add_metric('gauge.key', 3, 'g', 1.0)
+        server.add_metric('gauge.key', 5, 'g', 1.0)
+
+        metrics_list = server.calculate_interval_metrics()
+        metrics_dict = {(m['key'], m['type']): m for m in metrics_list}
+
+        counter = metrics_dict[('counter.key', 'c')]
+        self.assertEqual(counter['count'], 8)
+
+        timer = metrics_dict[('timer.key', 'ms')]
+        self.assertEqual(timer['min'], 10)
+        self.assertEqual(timer['max'], 30)
+        self.assertEqual(timer['mean'], 20)
+        self.assertEqual(timer['count'], 2)
+        self.assertEqual(timer['max_threshold'], 10)
+        self.assertEqual(timer['pct_threshold'], 90)
+
+        gauge = metrics_dict[('gauge.key', 'g')]
+        self.assertEqual(gauge['value'], 5)
+
+        msg_counter = server.format_metric(counter)
+        self.assertIn('counter.key.count 8', msg_counter)
+
+        msg_timer = server.format_metric(timer)
+        self.assertIn('timer.key.lower 10', msg_timer)
+
+        msg_gauge = server.format_metric(gauge)
+        self.assertIn('gauge.key.gauge 5', msg_gauge)
+
 
 if __name__ == '__main__':
     unittest.main()
