@@ -8,7 +8,6 @@ import signal
 import socket
 import socketserver
 import functools
-import sys
 import threading
 import time
 
