@@ -7,6 +7,7 @@ import re
 import signal
 import socket
 import socketserver
+import functools
 import sys
 import threading
 import time
@@ -84,7 +85,7 @@ def parse_line(metric_line):
             sample_rate = float(components[2].split('@')[1])
         return key, data, metric_type, sample_rate
     except Exception as e:
-        raise ValueError(str(e) + ' line: [%s]' % metric_line)
+        raise ValueError(f"{e} line: [{metric_line}]")
 
 
 def add_metric(key, data, metric_type, sample_rate):
@@ -109,7 +110,7 @@ class memoized(object):
          self.cache[args] = value
          return value
       except TypeError:
-         # uncachable -- for instance, passing a list as an argument.
+        # uncacheable -- for instance, passing a list as an argument.
          # Better to not cache than to blow up entirely.
          return self.func(*args)
    def __repr__(self):
@@ -124,9 +125,9 @@ def clean_key(key):
     '''
     Replace whitespace with '_', '/' with '-', and remove all
     non-alphanumerics remaining (except '.', '_', and '-').
-
+    The cleaned key is returned in lowercase.
     '''
-    new_key = re.sub('''\s+''', '_', key)
+    new_key = re.sub(r'\s+', '_', key)
     new_key = new_key.replace('/', '-')
     new_key = re.sub(r'[^a-zA-Z_\-0-9\.]', '', new_key)
     return new_key.lower()
