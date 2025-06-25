@@ -5,3 +5,5 @@ lib/*
 bin/*
 man/*
 include/*
+.venv/
+__pycache__/

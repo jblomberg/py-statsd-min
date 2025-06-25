@@ -281,3 +281,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# If you want to use the server as a module, move this file's logic into py_statsd_min/__init__.py or another module file.
+# For now, just import from this file if needed.

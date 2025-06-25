@@ -25,3 +25,20 @@ A minimal Python implementation of Etsy's [statsD].
 [gauges-pull]: https://github.com/etsy/statsd/pull/62
 [py-statsd]: https://github.com/sivy/py-statsd
 [statsite]: https://github.com/kiip/statsite
+
+## Development
+
+This project uses [uv](https://github.com/astral-sh/uv) for dependency management and
+[Hatch](https://hatch.pypa.io) as the build backend.
+Create a virtual environment and install the project in editable mode with the test extra:
+
+```bash
+uv venv
+uv pip install -e .[test]
+```
+
+Run the unit tests with:
+
+```bash
+python -m unittest discover -s tests
+```

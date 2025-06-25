@@ -1,13 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-
-# Path hack.
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import server
+import py_statsd_min.server as server
 
 import unittest
 
